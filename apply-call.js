@@ -8,6 +8,12 @@ var harness = {
     },
     applysetname: function () {
         this.setname.apply(this, arguments);
+    },
+    apply: function (name) {
+        this.setname.apply(this, [name]);
+    },
+    call: function (name) {
+        this.setname.call(this, name);
     }
 };
 
@@ -24,8 +30,14 @@ suite.
     add('apply', function () {
         harness.setname.apply(harness, ['bob']);
     }).
+    add('this#apply', function () {
+        harness.apply('bob');
+    }).
     add('call', function () {
         harness.setname.call(harness, 'bob');
+    }).
+    add('this#call', function () {
+        harness.call('bob');
     }).
     add('bind', function () {
         harness.boundsetname('bob');
