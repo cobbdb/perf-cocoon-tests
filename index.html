@@ -5,69 +5,72 @@
 </head>
 <body>
     <script>
-    
-    
+
+
 var suite = new Benchmark.Suite;
 
-var harness = {
-    setname: function (name) {
-        this.name = name;
-    },
-    applysetname: function () {
-        this.setname.apply(this, arguments);
-    },
-    apply: function (name) {
-        this.setname.apply(this, [name]);
-    },
-    call: function (name) {
-        this.setname.call(this, name);
-    }
-};
-
-harness.boundsetname = harness.setname.bind(harness);
-harness.dobsn = function () {
-    harness.boundsetname.apply(harness, arguments);
-};
+var i, harness = [];
+for (i = 0; i < 100; i += 1) {
+    harness.push({
+        setname: function (name) {
+            this.name = name;
+        },
+        applysetname: function () {
+            this.setname.apply(this, arguments);
+        }
+    });
+}
 
 // add tests
 suite.
-    add('direct exec', function () {
-        harness.setname('bob');
+    add('direct: for', function () {
+        var i, len = harness.length, pivot;
+        for (i = 0; i < len; i += 1) {
+            pivot = harness[i];
+            pivot.setname('bob');
+        }
     }).
-    add('apply', function () {
-        harness.setname.apply(harness, ['bob']);
+    add('direct: for len-inner', function () {
+        var i, pivot;
+        for (i = 0; i < harness.length; i += 1) {
+            pivot = harness[i];
+            pivot.setname('bob');
+        }
     }).
-    add('this#apply', function () {
-        harness.apply('bob');
+    add('direct: forEach', function () {
+        harness.forEach(function (pivot) {
+            pivot.setname('bob');
+        });
     }).
-    add('call', function () {
-        harness.setname.call(harness, 'bob');
+    add('apply: for', function () {
+        var i, len = harness.length, pivot;
+        for (i = 0; i < len; i += 1) {
+            pivot = harness[i];
+            pivot.applysetname('bob');
+        }
     }).
-    add('this#call', function () {
-        harness.call('bob');
+    add('apply: for len-inner', function () {
+        var i, pivot;
+        for (i = 0; i < harness.length; i += 1) {
+            pivot = harness[i];
+            pivot.applysetname('bob');
+        }
     }).
-    add('bind', function () {
-        harness.boundsetname('bob');
+    add('apply: forEach', function () {
+        harness.forEach(function (pivot) {
+            pivot.applysetname('bob');
+        });
     }).
-    add('apply w/ args', function () {
-        harness.applysetname('bob');
-    }).
-    add('bind w/ args', function () {
-        harness.dobsn('bob');
-    }).
-    // add listeners
     on('cycle', function (event) {
         console.log(String(event.target));
     }).
     on('complete', function () {
         console.log('Fastest is ' + this.filter('fastest').pluck('name'));
     }).
-    // run async
     run({
         async: true
     });
 
-    
     
     </script>
 </body>
