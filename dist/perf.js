@@ -1,3 +1,5 @@
+(function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
+(function (process,global){
 /*!
  * Benchmark.js v1.0.0 <http://benchmarkjs.com/>
  * Copyright 2010-2012 Mathias Bynens <http://mths.be/>
@@ -1044,7 +1046,7 @@
   function isPlainObject(value) {
     // avoid non-objects and false positives for `arguments` objects in IE < 9
     var result = false;
-    if (!(value && typeof value == 'object') || isArguments(value)) {
+    if (!(value && typeof value == 'object') || (noArgumentsClass && isArguments(value))) {
       return result;
     }
     // IE < 9 presents DOM nodes as `Object` objects except they have `toString`
@@ -3091,7 +3093,6 @@
 
       /**
        * The maximum time a benchmark is allowed to run before finishing (secs).
-       *
        * Note: Cycle delays aren't counted toward the maximum time.
        *
        * @memberOf Benchmark.options
@@ -3917,3 +3918,173 @@
     clock({ '_original': { 'fn': noop, 'count': 1, 'options': {} } });
   }
 }(this));
+
+}).call(this,require('_process'),typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
+},{"_process":2}],2:[function(require,module,exports){
+// shim for using process in browser
+
+var process = module.exports = {};
+var queue = [];
+var draining = false;
+var currentQueue;
+var queueIndex = -1;
+
+function cleanUpNextTick() {
+    draining = false;
+    if (currentQueue.length) {
+        queue = currentQueue.concat(queue);
+    } else {
+        queueIndex = -1;
+    }
+    if (queue.length) {
+        drainQueue();
+    }
+}
+
+function drainQueue() {
+    if (draining) {
+        return;
+    }
+    var timeout = setTimeout(cleanUpNextTick);
+    draining = true;
+
+    var len = queue.length;
+    while(len) {
+        currentQueue = queue;
+        queue = [];
+        while (++queueIndex < len) {
+            currentQueue[queueIndex].run();
+        }
+        queueIndex = -1;
+        len = queue.length;
+    }
+    currentQueue = null;
+    draining = false;
+    clearTimeout(timeout);
+}
+
+process.nextTick = function (fun) {
+    var args = new Array(arguments.length - 1);
+    if (arguments.length > 1) {
+        for (var i = 1; i < arguments.length; i++) {
+            args[i - 1] = arguments[i];
+        }
+    }
+    queue.push(new Item(fun, args));
+    if (queue.length === 1 && !draining) {
+        setTimeout(drainQueue, 0);
+    }
+};
+
+// v8 likes predictible objects
+function Item(fun, array) {
+    this.fun = fun;
+    this.array = array;
+}
+Item.prototype.run = function () {
+    this.fun.apply(null, this.array);
+};
+process.title = 'browser';
+process.browser = true;
+process.env = {};
+process.argv = [];
+process.version = ''; // empty string to avoid regexp issues
+process.versions = {};
+
+function noop() {}
+
+process.on = noop;
+process.addListener = noop;
+process.once = noop;
+process.off = noop;
+process.removeListener = noop;
+process.removeAllListeners = noop;
+process.emit = noop;
+
+process.binding = function (name) {
+    throw new Error('process.binding is not supported');
+};
+
+// TODO(shtylman)
+process.cwd = function () { return '/' };
+process.chdir = function (dir) {
+    throw new Error('process.chdir is not supported');
+};
+process.umask = function() { return 0; };
+
+},{}],3:[function(require,module,exports){
+var Benchmark = require('benchmark'),
+    suite = Benchmark.Suite();
+
+var i, harness = [];
+for (i = -10; i < 10; i += 0.01) {
+    harness[i] = i;
+}
+var newMath = {
+    abs: function (num) {
+        return num < 0 ? -num : num;
+    },
+    floor: function (num) {
+        return num | num;
+    },
+    floor0: function (num) {
+        return num | 0;
+    }
+};
+
+// add tests
+suite.
+    add('Math.abs()', {
+        fn: function () {
+            var i, len = harness.length, pivot, temp;
+            for (i = 0; i < len; i += 1) {
+                pivot = harness[i];
+                temp = Math.abs(pivot);
+            }
+        }
+    }).
+    add('newMath.abs()', {
+        fn: function () {
+            var i, len = harness.length, pivot, temp;
+            for (i = 0; i < len; i += 1) {
+                pivot = harness[i];
+                temp = newMath.abs(pivot);
+            }
+        }
+    }).
+    add('Math.floor()', {
+        fn: function () {
+            var i, len = harness.length, pivot, temp;
+            for (i = 0; i < len; i += 1) {
+                pivot = harness[i];
+                temp = Math.floor(pivot);
+            }
+        }
+    }).
+    add('newMath.floor()', {
+        fn: function () {
+            var i, len = harness.length, pivot, temp;
+            for (i = 0; i < len; i += 1) {
+                pivot = harness[i];
+                temp = newMath.floor(pivot);
+            }
+        }
+    }).
+    add('newMath.floor0()', {
+        fn: function () {
+            var i, len = harness.length, pivot, temp;
+            for (i = 0; i < len; i += 1) {
+                pivot = harness[i];
+                temp = newMath.floor0(pivot);
+            }
+        }
+    }).
+    on('cycle', function (event) {
+        console.log(String(event.target));
+    }).
+    on('complete', function () {
+        console.log('Fastest is ' + this.filter('fastest').pluck('name'));
+    }).
+    run();
+
+},{"benchmark":1}]},{},[3]);

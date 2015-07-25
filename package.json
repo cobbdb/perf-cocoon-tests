@@ -1,0 +1,14 @@
+{
+  "devDependencies": {
+    "grunt": "latest",
+    "grunt-browserify": "latest",
+    "grunt-contrib-compress": "latest",
+    "matchdep": "latest"
+  },
+  "dependencies": {
+    "benchmark": "latest"
+  },
+  "scripts": {
+    "test": "node src/test.js"
+  }
+}
