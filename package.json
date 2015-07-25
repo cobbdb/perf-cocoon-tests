@@ -3,6 +3,7 @@
     "grunt": "latest",
     "grunt-browserify": "latest",
     "grunt-contrib-compress": "latest",
+    "grunt-exec": "latest",
     "matchdep": "latest"
   },
   "dependencies": {

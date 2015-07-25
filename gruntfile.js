@@ -8,6 +8,7 @@
 
     grunt.registerTask('default', [
         'browserify',
-        'compress'
+        'compress',
+        'exec:deploy'
     ]);
 };
