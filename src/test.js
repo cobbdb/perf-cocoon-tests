@@ -1,6 +1,11 @@
 ﻿var Benchmark = require('benchmark'),
     suite = Benchmark.Suite();
 
+/**
+ * TODO: Test is Dragon.PI is faster
+ * than Math.PI
+ */
+
 var i, harness = [], stuff;
 for (i = -10; i < 10; i += 0.01) {
     harness[i] = {
