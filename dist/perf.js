@@ -4013,69 +4013,47 @@ process.chdir = function (dir) {
 process.umask = function() { return 0; };
 
 },{}],3:[function(require,module,exports){
+(function (global){
 var Benchmark = require('benchmark'),
     suite = Benchmark.Suite();
 
-var i, harness = [];
+var i, harness = [], stuff;
 for (i = -10; i < 10; i += 0.01) {
-    harness[i] = i;
+    harness[i] = {
+        x: 123 * i,
+        y: 456 * i,
+        math: function () {
+            return (
+                global.Math.pos(this.x, 2) +
+                global.Math.pos(this.y, 2)
+            );
+        },
+        manual: function () {
+            return (
+                this.x * this.x +
+                this.y * this.y
+            );
+        }
+    };
 }
-var newMath = {
-    abs: function (num) {
-        return num < 0 ? -num : num;
-    },
-    floor: function (num) {
-        return num | num;
-    },
-    floor0: function (num) {
-        return num | 0;
-    }
-};
 
 // add tests
 suite.
-    add('Math.abs()', {
+    add('math', {
         fn: function () {
             var i, len = harness.length, pivot, temp;
             for (i = 0; i < len; i += 1) {
                 pivot = harness[i];
-                temp = Math.abs(pivot);
+                temp = pivot.math();
             }
         }
     }).
-    add('newMath.abs()', {
+    add('manual', {
         fn: function () {
             var i, len = harness.length, pivot, temp;
             for (i = 0; i < len; i += 1) {
                 pivot = harness[i];
-                temp = newMath.abs(pivot);
-            }
-        }
-    }).
-    add('Math.floor()', {
-        fn: function () {
-            var i, len = harness.length, pivot, temp;
-            for (i = 0; i < len; i += 1) {
-                pivot = harness[i];
-                temp = Math.floor(pivot);
-            }
-        }
-    }).
-    add('newMath.floor()', {
-        fn: function () {
-            var i, len = harness.length, pivot, temp;
-            for (i = 0; i < len; i += 1) {
-                pivot = harness[i];
-                temp = newMath.floor(pivot);
-            }
-        }
-    }).
-    add('newMath.floor0()', {
-        fn: function () {
-            var i, len = harness.length, pivot, temp;
-            for (i = 0; i < len; i += 1) {
-                pivot = harness[i];
-                temp = newMath.floor0(pivot);
+                temp = pivot.manual();
             }
         }
     }).
@@ -4087,4 +4065,5 @@ suite.
     }).
     run();
 
+}).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
 },{"benchmark":1}]},{},[3]);
