@@ -6,39 +6,47 @@
  * than Math.PI
  */
 
-var i, harness = [], stuff;
-for (i = -10; i < 10; i += 0.01) {
-    harness[i] = {
-        arr: new Array(5000).join('XXXX'),
-        one: function (arr) {
-            return new Array(5000).join('XXXX');
-        },
-        empty: function () {
-            return new Array(5000).join('XXXX');
-        }
-    };
+var i, harness = [];
+function dosetup() {
+    harness = [];
+    for (i = 0; i < 1000; i += 1) {
+        harness[i] = {
+            arr: new Array(5000),
+            go: function () {
+                return 123;
+            }
+        };
+    }
 }
 
 // add tests
 suite.
-    add('empty', {
+    add('withsplice', {
+        setup: dosetup,
         fn: function () {
-            var i, len = harness.length, pivot, temp, arr;
+            var i, len = harness.length, pivot, temp;
             for (i = 0; i < len; i += 1) {
-                pivot = harness[i];
-                arr = pivot.arr;
-                temp = pivot.empty();
+                if (i % 2 === 0) {
+                    temp = harness[i].go();
+                    harness.splice(i, 1);
+                    i -= 1;
+                    len -= 1;
+                }
             }
         }
     }).
-    add('one', {
+    add('withdupe', {
+        setup: dosetup,
         fn: function () {
-            var i, len = harness.length, pivot, temp, arr;
+            var i, len = harness.length, pivot, temp, dupe = [];
             for (i = 0; i < len; i += 1) {
-                pivot = harness[i];
-                arr = pivot.arr;
-                temp = pivot.full(arr);
+                if (i % 2 === 0) {
+                    temp = harness[i].go();
+                } else {
+                    dupe.push(harness[i]);
+                }
             }
+            harness = dupe;
         }
     }).
     on('cycle', function (event) {
