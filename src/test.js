@@ -9,35 +9,35 @@
 var i, harness = [], stuff;
 for (i = -10; i < 10; i += 0.01) {
     harness[i] = {
-        a: [i, i*2, i*3],
-        b: [i*3, i*4, i*5],
-        c: i*6,
-        concat: function () {
-            return [].concat(a, b, c);
+        arr: new Array(5000).join('XXXX'),
+        one: function (arr) {
+            return new Array(5000).join('XXXX');
         },
-        push: function () {
-            return [].push.apply(
+        empty: function () {
+            return new Array(5000).join('XXXX');
         }
     };
 }
 
 // add tests
 suite.
-    add('math', {
+    add('empty', {
         fn: function () {
-            var i, len = harness.length, pivot, temp;
+            var i, len = harness.length, pivot, temp, arr;
             for (i = 0; i < len; i += 1) {
                 pivot = harness[i];
-                temp = pivot.math();
+                arr = pivot.arr;
+                temp = pivot.empty();
             }
         }
     }).
-    add('manual', {
+    add('one', {
         fn: function () {
-            var i, len = harness.length, pivot, temp;
+            var i, len = harness.length, pivot, temp, arr;
             for (i = 0; i < len; i += 1) {
                 pivot = harness[i];
-                temp = pivot.manual();
+                arr = pivot.arr;
+                temp = pivot.full(arr);
             }
         }
     }).
