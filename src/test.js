@@ -6,14 +6,32 @@
  * than Math.PI
  */
 
-var i, harness = [];
+var i, harness = [], mymath = {
+    PI: 3.14159,
+    PI2: 6.28318
+};
 function dosetup() {
     harness = [];
     for (i = 0; i < 1000; i += 1) {
         harness[i] = {
-            arr: new Array(5000),
-            go: function () {
-                return 123;
+            byswitch: function (term) {
+                switch (term) {
+                    case 'red':
+                        return 'apple';
+                    case 'pink':
+                        return 'heart';
+                    default:
+                        return 'not found';
+                }
+            },
+            byif: function (term) {
+                if (term === 'red') {
+                    return 'apple';
+                } else if (term === 'pink') {
+                    return 'heart';
+                } else {
+                    return 'not found';
+                }
             }
         };
     }
@@ -21,32 +39,24 @@ function dosetup() {
 
 // add tests
 suite.
-    add('withsplice', {
+    add('by switch', {
         setup: dosetup,
         fn: function () {
             var i, len = harness.length, pivot, temp;
             for (i = 0; i < len; i += 1) {
-                if (i % 2 === 0) {
-                    temp = harness[i].go();
-                    harness.splice(i, 1);
-                    i -= 1;
-                    len -= 1;
-                }
+                pivot = harness[i];
+                temp = pivot.byswitch('sdf');
             }
         }
     }).
-    add('withdupe', {
+    add('by if', {
         setup: dosetup,
         fn: function () {
-            var i, len = harness.length, pivot, temp, dupe = [];
+            var i, len = harness.length, pivot, temp;
             for (i = 0; i < len; i += 1) {
-                if (i % 2 === 0) {
-                    temp = harness[i].go();
-                } else {
-                    dupe.push(harness[i]);
-                }
+                pivot = harness[i];
+                temp = pivot.byif('sdf');
             }
-            harness = dupe;
         }
     }).
     on('cycle', function (event) {
