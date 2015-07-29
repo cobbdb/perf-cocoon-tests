@@ -6,56 +6,80 @@
  * than Math.PI
  */
 
-var i, harness = [], mymath = {
-    PI: 3.14159,
-    PI2: 6.28318
-};
+var i, j,
+    harness = [];
 function dosetup() {
     harness = [];
     for (i = 0; i < 1000; i += 1) {
-        harness[i] = {
-            byswitch: function (term) {
-                switch (term) {
-                    case 'red':
-                        return 'apple';
-                    case 'pink':
-                        return 'heart';
-                    default:
-                        return 'not found';
-                }
-            },
-            byif: function (term) {
-                if (term === 'red') {
-                    return 'apple';
-                } else if (term === 'pink') {
-                    return 'heart';
-                } else {
-                    return 'not found';
-                }
-            }
-        };
+        if (i % 2 === 0) {
+            harness[i] = function () {};
+        } else {
+            harness[i] = [
+                function () {},
+                function () {}
+            ];
+        }
     }
+}
+
+function toArray(item) {
+    if (item) {
+        return item.push ? item : [item];
+    }
+    return [];
+}
+function concat() {
+    var i, len = arguments.length,
+        pivot, arr;
+    if (arguments[0].push) {
+        arr = arguments[0];
+        i = 1;
+    } else {
+        arr = [];
+        i = 0;
+    }
+    for (i; i < len; i += 1) {
+        pivot = arguments[i];
+        if (pivot || pivot === 0 || pivot === '') {
+            if (pivot.push) {
+                arr.push.apply(arr, pivot);
+            } else {
+                arr.push(pivot);
+            }
+        }
+    }
+    return arr;
 }
 
 // add tests
 suite.
-    add('by switch', {
+    add('concat', {
         setup: dosetup,
         fn: function () {
             var i, len = harness.length, pivot, temp;
             for (i = 0; i < len; i += 1) {
                 pivot = harness[i];
-                temp = pivot.byswitch('sdf');
+                temp = [].concat(pivot, pivot);
             }
         }
     }).
-    add('by if', {
+    add('detect', {
         setup: dosetup,
         fn: function () {
             var i, len = harness.length, pivot, temp;
             for (i = 0; i < len; i += 1) {
                 pivot = harness[i];
-                temp = pivot.byif('sdf');
+                temp = toArray(pivot);
+            }
+        }
+    }).
+    add('manual', {
+        setup: dosetup,
+        fn: function () {
+            var i, len = harness.length, pivot, temp;
+            for (i = 0; i < len; i += 1) {
+                pivot = harness[i];
+                temp = concat(pivot, pivot);
             }
         }
     }).

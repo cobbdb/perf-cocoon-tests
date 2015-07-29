@@ -4013,47 +4013,82 @@ process.chdir = function (dir) {
 process.umask = function() { return 0; };
 
 },{}],3:[function(require,module,exports){
-(function (global){
 var Benchmark = require('benchmark'),
     suite = Benchmark.Suite();
 
-var i, harness = [], stuff;
-for (i = -10; i < 10; i += 0.01) {
-    harness[i] = {
-        x: 123 * i,
-        y: 456 * i,
-        math: function () {
-            return (
-                global.Math.pos(this.x, 2) +
-                global.Math.pos(this.y, 2)
-            );
-        },
-        manual: function () {
-            return (
-                this.x * this.x +
-                this.y * this.y
-            );
+/**
+ * TODO: Test is Dragon.PI is faster
+ * than Math.PI
+ */
+
+var i, j,
+    harness = [];
+function dosetup() {
+    harness = [];
+    for (i = 0; i < 1000; i += 1) {
+        if (i % 2 === 0) {
+            harness[i] = function () {};
+        } else {
+            harness[i] = [
+                function () {},
+                function () {}
+            ];
         }
-    };
+    }
+}
+
+function toArray(item) {
+    if (item) {
+        return item.push ? item : [item];
+    }
+    return [];
+}
+function concat() {
+    var i, len = arguments.length,
+        pivot,
+        arr = [];
+    for (i = 0; i < len; i += 1) {
+        pivot = arguments[i];
+        if (pivot || pivot === 0 || pivot === '') {
+            if (pivot.push) {
+                arr.push.apply(arr, pivot);
+            } else {
+                arr.push(pivot);
+            }
+        }
+    }
+    return arr;
 }
 
 // add tests
 suite.
-    add('math', {
+    add('concat', {
+        setup: dosetup,
         fn: function () {
             var i, len = harness.length, pivot, temp;
             for (i = 0; i < len; i += 1) {
                 pivot = harness[i];
-                temp = pivot.math();
+                temp = [].concat(pivot, pivot);
+            }
+        }
+    }).
+    add('detect', {
+        setup: dosetup,
+        fn: function () {
+            var i, len = harness.length, pivot, temp;
+            for (i = 0; i < len; i += 1) {
+                pivot = harness[i];
+                temp = toArray(pivot);
             }
         }
     }).
     add('manual', {
+        setup: dosetup,
         fn: function () {
             var i, len = harness.length, pivot, temp;
             for (i = 0; i < len; i += 1) {
                 pivot = harness[i];
-                temp = pivot.manual();
+                temp = concat(pivot, pivot);
             }
         }
     }).
@@ -4065,5 +4100,4 @@ suite.
     }).
     run();
 
-}).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
 },{"benchmark":1}]},{},[3]);
